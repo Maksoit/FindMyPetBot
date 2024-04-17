@@ -1,6 +1,6 @@
 from aiogram import Bot
 from aiogram.types import CallbackQuery
-from core.utils.callbackdata import MacInfo
+from core.utils.callbackdata import MacInfo, InlineInfo
 
 # async def select_macbook(call: CallbackQuery, bot: Bot):
 #     call_type, call_but, num = call.data.split('_')
@@ -15,3 +15,12 @@ async def select_macbook(call: CallbackQuery, bot: Bot, callback_data: MacInfo):
     
     await call.message.answer(answer)
     await call.answer()
+    
+async def select_loss(call: CallbackQuery, bot: Bot, callback_data: InlineInfo):
+    await call.message.answer("Чтобы сообщить о потери нам понадобится некоторая информация.")
+    await call.answer()
+
+async def select_find(call: CallbackQuery, bot: Bot, callback_data: InlineInfo):
+    await call.message.answer("Чтобы сообщить о находке нам понадобится некоторая информация.")
+    await call.answer()
+    

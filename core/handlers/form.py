@@ -22,7 +22,7 @@ async def get_last_name(message: Message, state: FSMContext):
     await state.update_data(last_name=message.text)
     await state.set_state(StepsForm.GET_AGE)
     
-async def get_age(message: Message, bot: Bot, state: FSMContext, apscheduler: AsyncIOScheduler):
+async def get_age(message: Message, bot: Bot, state: FSMContext ): #apscheduler: AsyncIOScheduler
     await message.answer(f'Твой возраст: {message.text}\r\n')
     await state.update_data(age=message.text)
     context_data = await state.get_data()
@@ -31,4 +31,7 @@ async def get_age(message: Message, bot: Bot, state: FSMContext, apscheduler: As
     name = context_data.get('name')
     await message.answer(f'Ur name: {name}')
     await state.clear()
-    apscheduler.add_job(send_message_middleware, trigger='date', run_date=datetime.now() + timedelta(seconds=13), kwargs={'chat_id':message.from_user.id} )
+    
+    test = input('KJkjkjkj')
+    print(test)
+    # apscheduler.add_job(send_message_middleware, trigger='date', run_date=datetime.now() + timedelta(seconds=13), kwargs={'chat_id':message.from_user.id} )

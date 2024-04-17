@@ -5,3 +5,24 @@ class MacInfo(CallbackData, prefix='mac'):
     call_but: str
     num: int
     
+class InlineInfo(CallbackData, prefix='inline'):
+    type: str
+
+class MissingReport():
+    cat_or_dog: int
+    first_coord: float
+    second_coord: float
+    description: str
+    path: str
+    date: str
+    id_tg: int
+    phone_num: int
+
+class StreetPets():
+    cat_or_dog: int
+    first_coord: float
+    second_coord: float
+    path: str
+    date: str
+    id_tg: int
+    

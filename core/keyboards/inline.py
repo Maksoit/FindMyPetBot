@@ -1,7 +1,7 @@
 from tkinter import N
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, keyboard_button
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from core.utils.callbackdata import MacInfo
+from core.utils.callbackdata import MacInfo, InlineInfo
 
 
 select_macbook = InlineKeyboardMarkup(inline_keyboard=[
@@ -32,4 +32,12 @@ def get_inline_keyboard():
     keyboard_builder.button(text='Link', url = "tg://user?id=1081261451")
     
     keyboard_builder.adjust(3, 2)
+    return keyboard_builder.as_markup()
+
+def get_inline_start():
+    keyboard_builder = InlineKeyboardBuilder()
+    keyboard_builder.button(text='Отправить запрос о потере своего животного', callback_data=InlineInfo(type='loss'))
+    keyboard_builder.button(text='Отправить запрос о находке животного на улице', callback_data=MacInfo(call_type='inline', call_but='builder', num=2))
+    
+    keyboard_builder.adjust(1, 1)
     return keyboard_builder.as_markup()
