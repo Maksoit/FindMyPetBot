@@ -8,12 +8,13 @@ from aiogram.fsm.storage.redis import RedisStorage
 # from apscheduler.jobstores.redis import RedisJobStore
 # from apscheduler_di import ContextSchedulerDecorator
 
-from core.handlers.basic import get_start, get_photo, get_hello, get_location, get_inline
-from core.handlers.callback import select_macbook, select_find, select_loss
+from core.handlers.basic import get_description, get_start, get_photo, get_hello, get_location, get_inline
+from core.handlers.callback import select_macbook, select_find, select_loss, select_animal
 from core.filters.iscontact import IsTrueContact
 from core.handlers.contact import get_true_contact, get_fake_contact
+from core.keyboards.reply import get_reply_empty
 from core.settings import Setting
-from aiogram.filters import Command, CommandStart
+from aiogram.filters import Command, CommandStart, callback_data
 from aiogram import F
 from core.utils.commands import set_commands
 from core.utils.callbackdata import InlineInfo, MacInfo
@@ -25,7 +26,7 @@ from core.middlewares.dbmiddleware import DBSession
 from aiogram.utils.chat_action import ChatActionMiddleware
 
 from core.handlers import form
-from core.utils.statesform import StepsForm
+from core.utils.statesform import LossSteps, StepsForm
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from core.handlers import apsched
 from datetime import datetime, timedelta
@@ -34,7 +35,7 @@ from datetime import datetime, timedelta
 async def start_bot(bot: Bot):
     await set_commands(bot)
     await bot.send_message(Setting.bots.admin_id,
-                           f"Bot has been launched at {datetime.now()}")
+                           f"Bot has been launched at {datetime.now()}", reply_markup=get_reply_empty())
     print('Bot has been launched')
 
 async def stop_bot(bot: Bot):
@@ -94,8 +95,14 @@ async def start():
     # dp.shipping_query.register(shipping_check)
 
     dp.message.register(get_start, Command(commands=['start', 'run']))  # CommandStart()
-    dp.callback_query.register(select_loss, InlineInfo.filter(F.type == 'loss'))
-    dp.callback_query.register(select_find, InlineInfo.filter(F.type == 'find'))
+    dp.callback_query.register(select_loss, InlineInfo.filter(F.type == "loss"))
+    dp.callback_query.register(select_find, InlineInfo.filter(F.type == "find"))
+    dp.callback_query.register(select_animal, InlineInfo.filter(), LossSteps.GET_ANIMAL)
+    
+    dp.message.register(get_location, F.location, LossSteps.GET_LOCATION_CONTACT)
+    dp.message.register(get_true_contact, F.contact, IsTrueContact(), LossSteps.GET_LOCATION_CONTACT)
+    dp.message.register(get_description, LossSteps.GET_DESCRIPTION)
+    dp.message.register(get_photo, F.photo, LossSteps.GET_PHOTO)
 
     # dp.callback_query.register(select_macbook, F.data.startswith('inline_'))
     # dp.callback_query.register(select_macbook, MacInfo.filter())
@@ -103,16 +110,15 @@ async def start():
     dp.message.register(get_location, F.location)
     dp.message.register(get_inline, Command(commands='inline'))
     dp.message.register(get_hello, F.text == 'Привет')
-    # dp.message.register(get_secret, F.text == 'Секрет')
-    dp.message.register(get_true_contact, F.contact, IsTrueContact())
+    
     dp.message.register(get_fake_contact, F.contact)
-    dp.message.register(get_photo, F.photo)
+    
     
     dp.startup.register(start_bot)
     dp.shutdown.register(stop_bot)
     dp.message.register(form.get_form, Command(commands='form'))
     dp.message.register(form.get_name, StepsForm.GET_NAME)
-    dp.message.register(form.get_last_name, StepsForm.GET_LAST_NAME)    
+    dp.message.register(form.get_last_name, StepsForm.GET_LAST_NAME)
     dp.message.register(form.get_age, StepsForm.GET_AGE)
 
 

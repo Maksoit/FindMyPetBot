@@ -7,6 +7,9 @@ class MacInfo(CallbackData, prefix='mac'):
     
 class InlineInfo(CallbackData, prefix='inline'):
     type: str
+    animal: str
+    IsLocated: bool
+    IsContact: bool
 
 class MissingReport():
     cat_or_dog: int
