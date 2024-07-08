@@ -13,12 +13,7 @@ from core.utils.statesform import FindSteps, LossSteps
 #     await call.message.answer(answer)
 #     await call.answer()
 
-async def select_macbook(call: CallbackQuery, bot: Bot, callback_data: MacInfo):
-    call_type, call_but, num = callback_data.call_type, callback_data.call_but, callback_data.num
-    answer = f'{call.message.from_user.first_name}, ты выбрал {call_type} и {call_but} и {num}'
-    
-    await call.message.answer(answer)
-    await call.answer()
+
     
 async def select_loss(call: CallbackQuery, bot: Bot, callback_data: InlineInfo, state: FSMContext):
     await call.message.answer("Чтобы сообщить о потери нам понадобится некоторая информация.\nПожалуйста, выбери животное (нажми на кнопку)", reply_markup=get_inline_animal())

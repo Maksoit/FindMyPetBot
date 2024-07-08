@@ -8,11 +8,12 @@ from aiogram.fsm.storage.redis import RedisStorage
 # from apscheduler.jobstores.redis import RedisJobStore
 # from apscheduler_di import ContextSchedulerDecorator
 
-from core.handlers.basic import get_description, get_location_find, get_location_loss, get_photo_find, get_photo_loss, get_start, get_hello, get_inline
-from core.handlers.callback import select_animal_find, select_macbook, select_find, select_loss, select_animal_loss
+from core.handlers.basic import command_cancel, command_find, command_loss, get_description, get_location_find, get_location_loss, get_photo_find, get_photo_loss, get_start, get_hello, get_inline, test_handler
+from core.handlers.callback import select_animal_find, select_find, select_loss, select_animal_loss
 from core.filters.iscontact import IsTrueContact
 from core.handlers.contact import get_fake_contact, get_true_contact_find, get_true_contact_loss
 from core.keyboards.reply import get_reply_empty
+from core.middlewares.vectoring import VectoringMW
 from core.settings import Setting
 from aiogram.filters import Command, CommandStart, callback_data
 from aiogram import F
@@ -22,8 +23,11 @@ from core.handlers.pay import order, pre_checkout_query, successful_payment, shi
 from core.middlewares.countermiddleware import CounterMiddleware
 from core.middlewares.officehours import OfficeHoursMiddleware
 from core.middlewares.apschedulermiddleware import SchedulerMiddleware
+from core.middlewares.modelmiddleware import ModelMW
 from core.middlewares.dbmiddleware import DBSession
 from aiogram.utils.chat_action import ChatActionMiddleware
+from model.Sasha import Vectorization
+from model.Vova import init_model
 
 from core.handlers import form
 from core.utils.statesform import FindSteps, LossSteps, StepsForm
@@ -46,10 +50,10 @@ async def stop_bot(bot: Bot):
 async def create_pool():
     return await aiomysql.create_pool(
         host = 'localhost', 
-        port = 3306, 
-        user='root',
-        password='Basek@319_',
-        db='research_bot',
+        port = Setting.database.port, 
+        user= 'root',
+        password=Setting.database.password,
+        db='findmypetdb',
         autocommit=True,
         )
 
@@ -61,6 +65,9 @@ async def start():
     bot = Bot(token=Setting.bots.bot_token, parse_mode='HTML')
 
     pool_connect = await create_pool()
+    
+    model = init_model()
+    # vectoring_model = Vectorization("", weight_path_resnet14=r"D:\Microsoft Visual Studio\Source\FindMyPetBot\model\resnet.pth", weight_path_simclr=r"D:\Microsoft Visual Studio\Source\FindMyPetBot\model\simclr.pth")
 
     storage = RedisStorage.from_url('redis://localhost:6379/0')
 
@@ -87,14 +94,19 @@ async def start():
     # dp.update.middleware.register(SchedulerMiddleware(scheduler))
 
     dp.update.middleware.register(DBSession(pool_connect))
+    dp.update.middleware.register(ModelMW(model))
+    #dp.update.middleware.register(VectoringMW(vectoring_model))
     dp.message.middleware.register(ChatActionMiddleware())
 
-    # dp.message.register(order, Command(commands='pay'))
-    # dp.pre_checkout_query.register(pre_checkout_query)
-    # dp.message.register(successful_payment, F.successful_payment)
-    # dp.shipping_query.register(shipping_check)
+    
 
     dp.message.register(get_start, Command(commands=['start', 'run']))  # CommandStart()
+    dp.message.register(command_find, Command(commands='find'))
+    dp.message.register(command_loss, Command(commands='loss'))
+    dp.message.register(command_cancel, Command(commands='cancel'))
+
+    dp.message.register(test_handler, Command(commands='test'))    
+
     dp.callback_query.register(select_loss, InlineInfo.filter(F.type == "loss"))
     dp.callback_query.register(select_find, InlineInfo.filter(F.type == "find"))
     dp.callback_query.register(select_animal_loss, InlineInfo.filter(), LossSteps.GET_ANIMAL)
@@ -108,22 +120,14 @@ async def start():
     dp.message.register(get_photo_loss, F.photo, LossSteps.GET_PHOTO)
     dp.message.register(get_photo_find, F.photo, FindSteps.GET_PHOTO)
 
-    # dp.callback_query.register(select_macbook, F.data.startswith('inline_'))
-    # dp.callback_query.register(select_macbook, MacInfo.filter())
-    # dp.callback_query.register(select_macbook, MacInfo.filter(F.num == 1))
-    # dp.message.register(get_location, F.location)
-    # dp.message.register(get_inline, Command(commands='inline'))
-    # dp.message.register(get_hello, F.text == 'Привет')
+    
     
     dp.message.register(get_fake_contact, F.contact)
     
     
     dp.startup.register(start_bot)
     dp.shutdown.register(stop_bot)
-    # dp.message.register(form.get_form, Command(commands='form'))
-    # dp.message.register(form.get_name, StepsForm.GET_NAME)
-    # dp.message.register(form.get_last_name, StepsForm.GET_LAST_NAME)
-    # dp.message.register(form.get_age, StepsForm.GET_AGE)
+    
 
 
     try:
