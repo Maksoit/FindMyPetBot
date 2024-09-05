@@ -44,13 +44,19 @@ def get_reply_keyboard():
     keyboard_builder.adjust(3, 2, 1)
     return keyboard_builder.as_markup(resize_keyboard = True, one_time_keyboard= True, input_field_placeholder='Отправь локу, тел или создай викт')
 
-def get_reply_geo_contact():
+def get_reply_geo():
     keyboard_builder = ReplyKeyboardBuilder()
 
     keyboard_builder.button(text='Отправить гео', request_location=True)
+    keyboard_builder.adjust(1)
+    return keyboard_builder.as_markup(resize_keyboard = True, one_time_keyboard= False, input_field_placeholder='Отправь локацию')
+
+def get_reply_contact():
+    keyboard_builder = ReplyKeyboardBuilder()
+
     keyboard_builder.button(text='Отправить контакт', request_contact=True)
-    keyboard_builder.adjust(1, 1)
-    return keyboard_builder.as_markup(resize_keyboard = True, one_time_keyboard= False, input_field_placeholder='Отправь локацию, а затем свой контакт')
+    keyboard_builder.adjust(1)
+    return keyboard_builder.as_markup(resize_keyboard = True, one_time_keyboard= False, input_field_placeholder='Отправь свой контакт')
 
 def get_reply_empty():
     keyboard_builder = ReplyKeyboardBuilder()

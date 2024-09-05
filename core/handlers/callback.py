@@ -1,8 +1,8 @@
 from aiogram import Bot
 from aiogram.types import CallbackQuery
-from core.utils.callbackdata import MacInfo, InlineInfo
+from core.utils.callbackdata import InlineInfo
 from core.keyboards.inline import get_inline_animal, get_inline_geo_contact
-from core.keyboards.reply import get_reply_geo_contact
+from core.keyboards.reply import get_reply_geo
 from aiogram.fsm.context import FSMContext
 from core.utils.statesform import FindSteps, LossSteps
 
@@ -21,16 +21,18 @@ async def select_loss(call: CallbackQuery, bot: Bot, callback_data: InlineInfo, 
     await call.answer()
     
 async def select_animal_loss(call: CallbackQuery, bot: Bot, callback_data: InlineInfo, state: FSMContext):
-    await call.message.answer(f"Ты выбрал {callback_data.animal}!\nТеперь нам понадобится информация о твоей геопозиции и номере!", reply_markup=get_reply_geo_contact())
+    await call.message.answer(f"Ты выбрал {callback_data.animal}!\nТеперь нам понадобится информация о твоей геопозиции!\n Ты можешь отправить ее по кнопке с мобильного устройства" \
+                              " или напечатать вручную в формате 'xx.xxx, yy.yyy'", reply_markup=get_reply_geo())
     await state.update_data(animal = callback_data.animal)
-    await state.set_state(LossSteps.GET_LOCATION_CONTACT)
+    await state.set_state(LossSteps.GET_LOCATION)
     await call.answer()
     
 
 async def select_animal_find(call: CallbackQuery, bot: Bot, callback_data: InlineInfo, state: FSMContext):
-    await call.message.answer(f"Ты выбрал {callback_data.animal}!\nТеперь нам понадобится информация о твоей геопозиции и номере!", reply_markup=get_reply_geo_contact())
+    await call.message.answer(f"Ты выбрал {callback_data.animal}!\nТеперь нам понадобится информация о твоей геопозиции!\n Ты можешь отправить ее по кнопке с мобильного устройства" \
+                              " или напечатать вручную в формате 'xx.xxx, yy.yyy'", reply_markup=get_reply_geo())
     await state.update_data(animal = callback_data.animal)
-    await state.set_state(FindSteps.GET_LOCATION_CONTACT)
+    await state.set_state(FindSteps.GET_LOCATION)
     await call.answer()
     
 
